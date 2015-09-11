@@ -1,0 +1,14 @@
+;
+; Settings for the Wherigo tools
+;
+
+[Lua decompiler]
+;
+; Here you can specify the command to execute to decompile lua byte-code 
+; %1$s if the lua byte-code file extracted from the .gwc file
+; %2$s if the output file
+; (Some tool may possibly need a "-o %2$s" option instead of redirecting the standard output)
+;
+command = java -jar extra/unluac_2015_06_13.jar %1$s > %2$s
+
+
