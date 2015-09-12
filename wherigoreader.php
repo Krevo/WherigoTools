@@ -4,7 +4,7 @@
   const LENGTH_SIGNATURE = 7;
   const OFFSET_NB_OBJECTS = 7;
   const LENGTH_NB_OBJECTS = 2;
-  const OFFSET_INFO_HEADER = 9;
+  const OFFSET_FILE_HEADER = 9;
   const LENGTH_OBJECT_ID = 2;
   const LENGTH_OBJECT_ADR = 4;
   
@@ -58,13 +58,20 @@
   $nb = hexdec(bin2hex($nbOfObjects[1]).bin2hex($nbOfObjects[0]));
   $adrTab = array(); // tab containing adress of each object
   for ($i = 0; $i < $nb; $i++) {
-    $objectId = substr($contents, OFFSET_INFO_HEADER + $i * (LENGTH_OBJECT_ID + LENGTH_OBJECT_ADR), LENGTH_OBJECT_ID);
-    $address = substr($contents, OFFSET_INFO_HEADER + $i * (LENGTH_OBJECT_ID + LENGTH_OBJECT_ADR) + LENGTH_OBJECT_ID, LENGTH_OBJECT_ADR);
+    $objectId = substr($contents, OFFSET_FILE_HEADER + $i * (LENGTH_OBJECT_ID + LENGTH_OBJECT_ADR), LENGTH_OBJECT_ID);
+    $address = substr($contents, OFFSET_FILE_HEADER + $i * (LENGTH_OBJECT_ID + LENGTH_OBJECT_ADR) + LENGTH_OBJECT_ID, LENGTH_OBJECT_ADR);
     $idDec = hexdec(bin2hex($objectId[1]).bin2hex($objectId[0]));
     $adrDec = hexdec(bin2hex($address[3]).bin2hex($address[2]).bin2hex($address[1]).bin2hex($address[0]));
     $adrTab[$idDec] = $adrDec;
   }
 
+  // Extraction information header (Name of cartridge, ...)
+  $INFORMATION_HEADER_OFFSET = OFFSET_FILE_HEADER + $nb * (LENGTH_OBJECT_ID + LENGTH_OBJECT_ADR);
+  $LENGTH_INFORMATION_HEADER = 2;
+  $headerLentghBinary = substr($contents, $INFORMATION_HEADER_OFFSET, $LENGTH_INFORMATION_HEADER);
+  $headerLength = hexdec(bin2hex($headerLentghBinary[1]).bin2hex($headerLentghBinary[0]));
+  file_put_contents($basename."_files/".$basename."_header.bin",substr($contents,$INFORMATION_HEADER_OFFSET + $LENGTH_INFORMATION_HEADER,$headerLength));
+   
   $objectTypeExt = array(
    0 => "luac",
    1 => "bmp",
