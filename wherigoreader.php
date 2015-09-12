@@ -65,6 +65,9 @@
     $adrTab[$idDec] = $adrDec;
   }
 
+  // Creating destination dir
+  @mkdir($basename."_files");
+
   // Extraction information header (Name of cartridge, ...)
   $INFORMATION_HEADER_OFFSET = OFFSET_FILE_HEADER + $nb * (LENGTH_OBJECT_ID + LENGTH_OBJECT_ADR);
   $LENGTH_INFORMATION_HEADER = 2;
@@ -88,7 +91,6 @@
   );
   $nbPerType = array();
 
-  @mkdir($basename."_files");
   $i = 0;
   $msg = "";
   foreach($adrTab as $k => $address) {
