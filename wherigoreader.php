@@ -27,16 +27,15 @@
     if ($hasSettingsSample) {
       echo "Copying $settingsSampleFilename to $settingsFilename".PHP_EOL;
       copy($settingsSampleFilename,$settingsFilename);
+      $hasSettings = file_exists($settingsFilename);
     }
   }
-
-  $hasSettings = file_exists($settingsFilename);
-  //print_r(parse_ini_file("settings.ini",true));
 
   // Open cartridge file
   $filename = $argv[1];
   $pathInfo = pathinfo($filename);
   $basename = $pathInfo['filename'];
+  $extension = $pathInfo['extension'];
 
   $fh = @fopen($filename,"rb");
   if ($fh === FALSE) {
@@ -46,8 +45,8 @@
   $contents = fread($fh, filesize($filename));
   fclose($fh);
 
-  $signature   = substr($contents, OFFSET_SIGNATURE, LENGTH_SIGNATURE); //fread($fp, 7);
-  $nbOfObjects = substr($contents, OFFSET_NB_OBJECTS, LENGTH_NB_OBJECTS); //$nbOfObjects = fread($fp, 2);
+  $signature   = substr($contents, OFFSET_SIGNATURE, LENGTH_SIGNATURE);
+  $nbOfObjects = substr($contents, OFFSET_NB_OBJECTS, LENGTH_NB_OBJECTS);
 
   // Check if the header of the file match the signature of a wherigo cartridge
   if (WHERIGO_SIGNATURE!==$signature) {
@@ -55,20 +54,15 @@
     die;
   }
 
+  echo "Reading Wherigo cartridge $basename.$extension\n";
   $nb = hexdec(bin2hex($nbOfObjects[1]).bin2hex($nbOfObjects[0]));
-  echo "$nb objects \n";
-
   $adrTab = array(); // tab containing adress of each object
-
   for ($i = 0; $i < $nb; $i++) {
     $objectId = substr($contents, OFFSET_INFO_HEADER + $i * (LENGTH_OBJECT_ID + LENGTH_OBJECT_ADR), LENGTH_OBJECT_ID);
     $address = substr($contents, OFFSET_INFO_HEADER + $i * (LENGTH_OBJECT_ID + LENGTH_OBJECT_ADR) + LENGTH_OBJECT_ID, LENGTH_OBJECT_ADR);
     $idDec = hexdec(bin2hex($objectId[1]).bin2hex($objectId[0]));
     $adrDec = hexdec(bin2hex($address[3]).bin2hex($address[2]).bin2hex($address[1]).bin2hex($address[0]));
     $adrTab[$idDec] = $adrDec;
-    echo "[Objet #$i - id = $idDec]\n";
-    echo bin2hex($objectId)."\n";
-    echo bin2hex($address)."\n";
   }
 
   $objectTypeExt = array(
@@ -85,9 +79,20 @@
    33 => "swf",
    49 => "txt",
   );
+  $nbPerType = array();
 
   @mkdir($basename."_files");
+  $i = 0;
+  $msg = "";
   foreach($adrTab as $k => $address) {
+    $i++;
+    if ($i>1) {
+      for ($j = 0; $j < strlen($msg); $j++) {
+       echo "\010";
+      }
+    }
+    $msg = sprintf("Processing object %d of %d (%01.0f %%)",$i,$nb,($i/$nb)*100);
+    echo $msg;
     //printf("%x \n",$address);
     $offset = 0;
     $objectType = 0;
@@ -99,9 +104,41 @@
     }
     $lengthBinary = substr($contents,$address+$offset,4);
     $lengthDec = hexdec(bin2hex($lengthBinary[3]).bin2hex($lengthBinary[2]).bin2hex($lengthBinary[1]).bin2hex($lengthBinary[0]));
-    file_put_contents($basename."_files/file_$k.".$objectTypeExt[$objectType],substr($contents,$address+$offset+4,$lengthDec));
-    // Lua file (id #0) can be decompiled with 
-    // java -jar unluac_2015_06_13.jar file_0.lub > file_0.lua
-
+    file_put_contents($basename."_files/".$basename."_$k.".$objectTypeExt[$objectType],substr($contents,$address+$offset+4,$lengthDec));
+    if (!isset($nbPerType[$objectTypeExt[$objectType]])) {
+      $nbPerType[$objectTypeExt[$objectType]] = 0;
+    }
+    $nbPerType[$objectTypeExt[$objectType]]++;
   }
+  echo PHP_EOL;
+
+  // Displaying number of files found per type
+  asort($nbPerType);
+  $msg = "Found ";
+  $msgPart = array();
+  foreach($nbPerType as $ext => $nb) {
+    $msgPart[] = "$nb .$ext file".(($nb>1)?"s":"");
+  }
+  $msg .= implode($msgPart, ", ");
+  echo $msg.PHP_EOL;
+  
+  // Trying to decompile the lua byte-code  
+  if ($hasSettings) {
+    $settings = parse_ini_file($settingsFilename,true);
+    if (isset($settings["Lua decompiler"]["command"])) {
+      echo "Trying to decompile the lua byte-code with command :".PHP_EOL;
+      $execCommand = sprintf(
+          $settings["Lua decompiler"]["command"], 
+          $basename."_files/".$basename."_0.".$objectTypeExt[0],
+          $basename."_files/".$basename."_0.lua"
+          );
+      echo "> $execCommand".PHP_EOL;
+      $output = array();
+      exec($execCommand,$output,$returnCode);
+      if ($returnCode==0) {
+        echo "Success !".PHP_EOL;
+      }
+    }
+  }
+
 
