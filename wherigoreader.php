@@ -56,7 +56,7 @@
 
   echo "Reading Wherigo cartridge $basename.$extension\n";
   $nb = hexdec(bin2hex($nbOfObjects[1]).bin2hex($nbOfObjects[0]));
-  $adrTab = array(); // tab containing adress of each object
+  $adrTab = array(); // tab containing address of each object
   for ($i = 0; $i < $nb; $i++) {
     $objectId = substr($contents, OFFSET_FILE_HEADER + $i * (LENGTH_OBJECT_ID + LENGTH_OBJECT_ADR), LENGTH_OBJECT_ID);
     $address = substr($contents, OFFSET_FILE_HEADER + $i * (LENGTH_OBJECT_ID + LENGTH_OBJECT_ADR) + LENGTH_OBJECT_ID, LENGTH_OBJECT_ADR);
@@ -70,11 +70,21 @@
 
   // Extraction information header (Name of cartridge, ...)
   $INFORMATION_HEADER_OFFSET = OFFSET_FILE_HEADER + $nb * (LENGTH_OBJECT_ID + LENGTH_OBJECT_ADR);
-  $LENGTH_INFORMATION_HEADER = 2;
-  $headerLentghBinary = substr($contents, $INFORMATION_HEADER_OFFSET, $LENGTH_INFORMATION_HEADER);
+  $LENGTH_INFORMATION_HEADER_LENGTH_FIELD = 4;
+  $headerLentghBinary = substr($contents, $INFORMATION_HEADER_OFFSET, $LENGTH_INFORMATION_HEADER_LENGTH_FIELD);
   $headerLength = hexdec(bin2hex($headerLentghBinary[1]).bin2hex($headerLentghBinary[0]));
-  file_put_contents($basename."_files/".$basename."_header.bin",substr($contents,$INFORMATION_HEADER_OFFSET + $LENGTH_INFORMATION_HEADER,$headerLength));
-   
+  $informationHeaderContent = substr($contents,$INFORMATION_HEADER_OFFSET + $LENGTH_INFORMATION_HEADER_LENGTH_FIELD,$headerLength);
+  file_put_contents($basename."_files/".$basename."_header.bin",$informationHeaderContent);
+
+  $INFORMATION_HEADER_LENGTH = 36;   
+  $ch1Fin = strpos($informationHeaderContent,chr(0),$INFORMATION_HEADER_LENGTH);
+  $type_of_cartridge = substr($informationHeaderContent, $INFORMATION_HEADER_LENGTH, $ch1Fin-$INFORMATION_HEADER_LENGTH);
+  echo "Type of cartridge = ".$type_of_cartridge.PHP_EOL;
+
+  $ch2Fin = strpos($informationHeaderContent,chr(0),$ch1Fin+1);
+  $playerName = substr($informationHeaderContent, $ch1Fin+1, $ch2Fin-$ch1Fin);
+  echo "Player name = ".$playerName.PHP_EOL;
+
   $objectTypeExt = array(
    0 => "luac",
    1 => "bmp",
