@@ -54,7 +54,6 @@
     die;
   }
 
-  echo "Reading Wherigo cartridge $basename.$extension\n";
   $nb = hexdec(bin2hex($nbOfObjects[1]).bin2hex($nbOfObjects[0]));
   $adrTab = array(); // tab containing address of each object
   for ($i = 0; $i < $nb; $i++) {
@@ -68,22 +67,71 @@
   // Creating destination dir
   @mkdir($basename."_files");
 
+  function readAsciiz($str,&$currentIndex) {
+    $endIndex = strpos($str,chr(0),$currentIndex);
+    $toReturn = substr($str, $currentIndex, $endIndex-$currentIndex);
+    $currentIndex = $endIndex + 1;
+    return $toReturn;
+  }
+
+  function readDouble($str,&$currentIndex) {
+    $data = substr($str, $currentIndex, $currentIndex+8);
+    $currentIndex += 8;
+    $number = unpack("d", $data);
+    return $number[1];
+  }
+
   // Extraction information header (Name of cartridge, ...)
   $INFORMATION_HEADER_OFFSET = OFFSET_FILE_HEADER + $nb * (LENGTH_OBJECT_ID + LENGTH_OBJECT_ADR);
   $LENGTH_INFORMATION_HEADER_LENGTH_FIELD = 4;
   $headerLentghBinary = substr($contents, $INFORMATION_HEADER_OFFSET, $LENGTH_INFORMATION_HEADER_LENGTH_FIELD);
-  $headerLength = hexdec(bin2hex($headerLentghBinary[1]).bin2hex($headerLentghBinary[0]));
+  $headerLength = hexdec(bin2hex($headerLentghBinary[3]).bin2hex($headerLentghBinary[2]).bin2hex($headerLentghBinary[1]).bin2hex($headerLentghBinary[0]));
   $informationHeaderContent = substr($contents,$INFORMATION_HEADER_OFFSET + $LENGTH_INFORMATION_HEADER_LENGTH_FIELD,$headerLength);
   file_put_contents($basename."_files/".$basename."_header.bin",$informationHeaderContent);
 
-  $INFORMATION_HEADER_LENGTH = 36;   
-  $ch1Fin = strpos($informationHeaderContent,chr(0),$INFORMATION_HEADER_LENGTH);
-  $type_of_cartridge = substr($informationHeaderContent, $INFORMATION_HEADER_LENGTH, $ch1Fin-$INFORMATION_HEADER_LENGTH);
-  echo "Type of cartridge = ".$type_of_cartridge.PHP_EOL;
+  $currentIndex = 0;
+  $latitude = readDouble($informationHeaderContent,$currentIndex);
+  $longitude = readDouble($informationHeaderContent,$currentIndex);
+  $altitude = readDouble($informationHeaderContent,$currentIndex);
+  $currentIndex += 4; // LONG unkown value
+  $currentIndex += 4; // LONG unkown value
+  $currentIndex += 2; // SHORT id of splashscreen
+  $currentIndex += 2; // SHORT id of icon
+  $type_of_cartridge = readAsciiz($informationHeaderContent,$currentIndex);
+  $playerName = readAsciiz($informationHeaderContent,$currentIndex);
+  $currentIndex += 4; // LONG unkown value
+  $currentIndex += 4; // LONG unkown value
+  $cartridgeName = readAsciiz($informationHeaderContent,$currentIndex);
+  $cartridgeGUID = readAsciiz($informationHeaderContent,$currentIndex);
+  $cartridgeDesc = readAsciiz($informationHeaderContent,$currentIndex);
+  $startLocationDesc = readAsciiz($informationHeaderContent,$currentIndex);
+  $version = readAsciiz($informationHeaderContent,$currentIndex);
+  $author = readAsciiz($informationHeaderContent,$currentIndex);
+  $company = readAsciiz($informationHeaderContent,$currentIndex);
+  $device = readAsciiz($informationHeaderContent,$currentIndex);
+  $currentIndex += 4; // LONG unkown value
+  $completionCode = readAsciiz($informationHeaderContent,$currentIndex);
 
-  $ch2Fin = strpos($informationHeaderContent,chr(0),$ch1Fin+1);
-  $playerName = substr($informationHeaderContent, $ch1Fin+1, $ch2Fin-$ch1Fin);
-  echo "Player name = ".$playerName.PHP_EOL;
+  echo "Reading Wherigo cartridge \"".$cartridgeName."\" (from file $basename.$extension)\n";
+
+  $clearHeaderText  = "Latitude = ".$latitude.PHP_EOL;
+  $clearHeaderText .= "Longitude = ".$longitude.PHP_EOL;
+  $clearHeaderText .= "Altitude = ".$altitude.PHP_EOL;
+  $clearHeaderText .= "Type of cartridge = ".$type_of_cartridge.PHP_EOL;
+  $clearHeaderText .= "Player name = ".$playerName.PHP_EOL;
+  $clearHeaderText .= "Cartridge name = ".$cartridgeName.PHP_EOL;
+  $clearHeaderText .= "Cartridge GUID = ".$cartridgeGUID.PHP_EOL;
+  $clearHeaderText .= "Cartridge desc. = ".$cartridgeDesc.PHP_EOL;
+  $clearHeaderText .= "Start location desc. = ".$startLocationDesc.PHP_EOL;
+  $clearHeaderText .= "Version = ".$version.PHP_EOL;
+  $clearHeaderText .= "Author = ".$author.PHP_EOL;
+  $clearHeaderText .= "Company = ".$company.PHP_EOL;
+  $clearHeaderText .= "Recommended device = ".$device.PHP_EOL;
+  $clearHeaderText .= "Completion code = ".substr($completionCode,0,15).PHP_EOL;
+  echo "------".PHP_EOL;
+  echo $clearHeaderText;
+  echo "------".PHP_EOL;
+  file_put_contents($basename."_files/".$basename."_header.txt",$clearHeaderText);
 
   $objectTypeExt = array(
    0 => "luac",
