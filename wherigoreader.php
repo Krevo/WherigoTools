@@ -81,6 +81,13 @@
     return $number[1];
   }
 
+  function readLong($str,&$currentIndex) {
+    $data = substr($str, $currentIndex, $currentIndex+4);
+    $currentIndex += 4;
+    $number = unpack("V", $data);
+    return $number[1];
+  }
+  
   // Extraction information header (Name of cartridge, ...)
   $INFORMATION_HEADER_OFFSET = OFFSET_FILE_HEADER + $nb * (LENGTH_OBJECT_ID + LENGTH_OBJECT_ADR);
   $LENGTH_INFORMATION_HEADER_LENGTH_FIELD = 4;
@@ -93,13 +100,13 @@
   $latitude = readDouble($informationHeaderContent,$currentIndex);
   $longitude = readDouble($informationHeaderContent,$currentIndex);
   $altitude = readDouble($informationHeaderContent,$currentIndex);
-  $currentIndex += 4; // LONG unkown value
+  $downloadDate = readLong($informationHeaderContent,$currentIndex); // seconds from 2004-02-10
   $currentIndex += 4; // LONG unkown value
   $currentIndex += 2; // SHORT id of splashscreen
   $currentIndex += 2; // SHORT id of icon
   $type_of_cartridge = readAsciiz($informationHeaderContent,$currentIndex);
   $playerName = readAsciiz($informationHeaderContent,$currentIndex);
-  $currentIndex += 4; // LONG unkown value
+  $playerId = readLong($informationHeaderContent,$currentIndex);
   $currentIndex += 4; // LONG unkown value
   $cartridgeName = readAsciiz($informationHeaderContent,$currentIndex);
   $cartridgeGUID = readAsciiz($informationHeaderContent,$currentIndex);
@@ -114,11 +121,19 @@
 
   echo "Reading Wherigo cartridge \"".$cartridgeName."\" (from file $basename.$extension)\n";
 
+  /*
+  $geocachingOriginOftime = mktime(1,0,0,2,10,2004);
+  $diffTime = $geocachingOriginOftime + $lastUpdate;
+  echo date("c",$diffTime).PHP_EOL;
+  */
+
   $clearHeaderText  = "Latitude = ".$latitude.PHP_EOL;
   $clearHeaderText .= "Longitude = ".$longitude.PHP_EOL;
   $clearHeaderText .= "Altitude = ".$altitude.PHP_EOL;
+  $clearHeaderText .= "Last update = ".$lastUpdate.PHP_EOL;
   $clearHeaderText .= "Type of cartridge = ".$type_of_cartridge.PHP_EOL;
   $clearHeaderText .= "Player name = ".$playerName.PHP_EOL;
+  $clearHeaderText .= "Player ID = ".$playerId.PHP_EOL;
   $clearHeaderText .= "Cartridge name = ".$cartridgeName.PHP_EOL;
   $clearHeaderText .= "Cartridge GUID = ".$cartridgeGUID.PHP_EOL;
   $clearHeaderText .= "Cartridge desc. = ".$cartridgeDesc.PHP_EOL;
