@@ -1,9 +1,9 @@
 <?php 
 
-  function extractStringFromLine($str)  {
-    $startIndex = strpos($str,'"');
-    $endIndex = strrpos($str,'"');
-    return substr($str,$startIndex+1,$endIndex-$startIndex-1);
+  function extractStringFromLine($str, $startToken = '"', $endToken = '"')  {
+    $startIndex = strpos($str, $startToken) + strlen($startToken);
+    $endIndex = strrpos($str, $endToken);
+    return substr($str, $startIndex, $endIndex - $startIndex);
   }
 
   function luaStringToPhpString($luaStr) {
@@ -87,9 +87,13 @@ end
 	  $LOOK_FOR_DTABLE = false;
     }
     if (!$LOOK_FOR_DTABLE && strpos($line,$uncryptStringFunctionName) !== FALSE) {
-      $chaineToDecrypt = luaStringToPhpString(extractStringFromLine(substr($line,strpos($line,$uncryptStringFunctionName))));
-      $decryptedLine = udecrypt($chaineToDecrypt,$dtable);
- 	  echo "-- ".$decryptedLine.PHP_EOL;
+      $results = array();
+      preg_match_all('`"([^"]*)"`', $line, $results);
+      foreach($results[1] as $item) {
+        $chaineToDecrypt = luaStringToPhpString($item);
+        $decryptedLine = udecrypt($chaineToDecrypt,$dtable);
+        echo "-- ".$decryptedLine.PHP_EOL;
+      }
 	}
 	echo $line;
   }
