@@ -67,7 +67,7 @@ end
     exit("Unable to open $filename !".PHP_EOL);
   }
   
-  $functionStringCryptPattern = "/function (_[a-zA-Z0-9]{3})\\(/";
+  $functionStringCryptPattern = "/function (_[a-zA-Z0-9]{3,})\\(str/";
   $match = array();
   $dtable = "";
   $LOOK_FOR_DTABLE = false;
