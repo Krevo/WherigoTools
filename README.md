@@ -18,9 +18,20 @@ This tool help you find answer that will be accepted by a wherigo created with U
 
 Usage :
 ```
-php finduanswer hash_to_find length_of_collision
+php finduanswer.php hash_to_find length_of_collision
 ```
 (length_of_collision should be at least 4 characters length)
     
+readustring
+---
+
+When using Urwhigo, all strings in the generated lua source code are obfuscated. This tool will read a lua source code and output the same source code with additionnal comment line giving you the readable version of each string.
+
+Usage :
+```
+php readustring.php lua_source_code > lua_source_code_with_decrypted_string
+```
+
+
 
 /!\ Wherigo is a registered trademark of Groundspeak Inc. The Wherigo design, platform, and associated intellectual property are also owned by Groundspeak Inc.
