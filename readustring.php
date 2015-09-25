@@ -94,8 +94,8 @@ end
         $decryptedLine = udecrypt($chaineToDecrypt,$dtable);
         echo "-- ".$decryptedLine.PHP_EOL;
       }
-	}
-	echo $line;
+    }
+    echo $line;
   }
 
   fclose($fh);
