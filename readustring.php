@@ -84,7 +84,7 @@ end
       $dtable = luaStringToPhpString(extractStringFromLine($line));
       $LOOK_FOR_DTABLE = false;
     }
-    if (!$LOOK_FOR_DTABLE && strpos($line, $uncryptStringFunctionName) !== FALSE) {
+    if (!$LOOK_FOR_FNAME && !$LOOK_FOR_DTABLE && strpos($line, $uncryptStringFunctionName) !== FALSE) {
       $results = array();
       preg_match_all('`"([^"]*)"`', $line, $results);
       foreach($results[1] as $item) {
@@ -97,4 +97,5 @@ end
   }
 
   fclose($fh);
+  exit(0);
 

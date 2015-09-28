@@ -5,10 +5,21 @@
 [Lua decompiler]
 ;
 ; Here you can specify the command to execute to decompile lua byte-code 
-; %1$s if the lua byte-code file extracted from the .gwc file
-; %2$s if the output file
+; %1$s is the lua byte-code file extracted from the .gwc file
+; %2$s is the output file
 ; (Some tool may possibly need a "-o %2$s" option instead of redirecting the standard output)
 ;
 command = java -jar extra/unluac_2015_06_13.jar %1$s > %2$s
+
+[Post processing]
+;
+; Here you can specify a command to execute in a post-processing stage (ie after the lua byte code has been decompiled for example)
+; %1$s is the input file (lua source code)
+; %2$s is the output file (comented lua source code
+; (Some tool may possibly need a "-o %2$s" option instead of redirecting the standard output)
+;
+; If the cartridge was created with Urwhigo, the "readustring' tool will enrich, lua source code with decrypted string
+;
+command = php readustring.php %1$s > %2$s
 
 

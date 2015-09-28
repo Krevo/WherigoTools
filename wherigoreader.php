@@ -87,7 +87,47 @@
     $number = unpack("V", $data);
     return $number[1];
   }
+
+  function luaDecompile($settings, $basename, $objectTypeExt) {
+    if (isset($settings["Lua decompiler"]["command"])) {
+      echo "Trying to decompile the lua byte-code with command :".PHP_EOL;
+      $execCommand = sprintf(
+          $settings["Lua decompiler"]["command"],
+          escapeshellarg($basename."_files/".$basename."_0.".$objectTypeExt[0]),
+          escapeshellarg($basename."_files/".$basename."_0.lua")
+          );
+      echo "> $execCommand".PHP_EOL;
+      $output = array();
+      exec($execCommand,$output,$returnCode);
+      if ($returnCode==0) {
+        echo "Success !".PHP_EOL;
+      }
+      return $returnCode;
+    }
+  }
   
+  function postProcessing($settings, $basename, $objectTypeExt) {
+    if (isset($settings["Post processing"]["command"])) {
+      echo "Post-processing command :".PHP_EOL;
+      $tmpfile = tempnam($basename."_files", $basename);
+      echo $tmpfile.PHP_EOL;
+      rename($basename."_files/".$basename."_0.lua", $tmpfile);
+      $execCommand = sprintf(
+          $settings["Post processing"]["command"],
+          escapeshellarg($tmpfile), //$basename."_files/".$basename."_0.".$objectTypeExt[0],
+          escapeshellarg($basename."_files/".$basename."_0.lua")
+          );
+      echo "> $execCommand".PHP_EOL;
+      $output = array();
+      exec($execCommand,$output,$returnCode);
+      if ($returnCode==0) {
+        echo "Success !".PHP_EOL;
+      }
+      unlink($tmpfile);
+      return $returnCode;
+    }
+  }
+
   // Extraction information header (Name of cartridge, ...)
   $INFORMATION_HEADER_OFFSET = OFFSET_FILE_HEADER + $nb * (LENGTH_OBJECT_ID + LENGTH_OBJECT_ADR);
   $LENGTH_INFORMATION_HEADER_LENGTH_FIELD = 4;
@@ -130,7 +170,7 @@
   $clearHeaderText  = "Latitude = ".$latitude.PHP_EOL;
   $clearHeaderText .= "Longitude = ".$longitude.PHP_EOL;
   $clearHeaderText .= "Altitude = ".$altitude.PHP_EOL;
-  $clearHeaderText .= "Last update = ".$lastUpdate.PHP_EOL;
+  //$clearHeaderText .= "Last update = ".$lastUpdate.PHP_EOL;
   $clearHeaderText .= "Type of cartridge = ".$type_of_cartridge.PHP_EOL;
   $clearHeaderText .= "Player name = ".$playerName.PHP_EOL;
   $clearHeaderText .= "Player ID = ".$playerId.PHP_EOL;
@@ -207,20 +247,9 @@
   // Trying to decompile the lua byte-code  
   if ($hasSettings) {
     $settings = parse_ini_file($settingsFilename,true);
-    if (isset($settings["Lua decompiler"]["command"])) {
-      echo "Trying to decompile the lua byte-code with command :".PHP_EOL;
-      $execCommand = sprintf(
-          $settings["Lua decompiler"]["command"], 
-          $basename."_files/".$basename."_0.".$objectTypeExt[0],
-          $basename."_files/".$basename."_0.lua"
-          );
-      echo "> $execCommand".PHP_EOL;
-      $output = array();
-      exec($execCommand,$output,$returnCode);
-      if ($returnCode==0) {
-        echo "Success !".PHP_EOL;
-      }
+    $res = luaDecompile($settings, $basename, $objectTypeExt);
+    if ($res == 0) {
+      postProcessing($settings, $basename, $objectTypeExt);
     }
   }
-
 
