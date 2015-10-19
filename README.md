@@ -34,4 +34,4 @@ php readustring.php lua_source_code > lua_source_code_with_decrypted_string
 
 
 
-/!\ Wherigo is a registered trademark of Groundspeak Inc. The Wherigo design, platform, and associated intellectual property are also owned by Groundspeak Inc.
+:warning: Wherigo is a registered trademark of Groundspeak Inc. The Wherigo design, platform, and associated intellectual property are also owned by Groundspeak Inc.
