@@ -11,7 +11,7 @@
     $res = preg_match_all("/\\\\[0-9]{3}/",$luaStr,$match);
     $search[] = "\\b"; $repl[] = "\x8"; // backslash
     $search[] = "\\v"; $repl[] = "\xB"; // vertical tab
-    $search[] = "\\a"; $repl[] = "\xA"; // bell
+    $search[] = "\\a"; $repl[] = "\x7"; // bell
     $search[] = "\\t"; $repl[] = "\t"; // tab
     $search[] = "\\r"; $repl[] = "\r"; 
     $search[] = "\\n"; $repl[] = "\n";
@@ -86,7 +86,9 @@ end
     }
     if (!$LOOK_FOR_FNAME && !$LOOK_FOR_DTABLE && strpos($line, $uncryptStringFunctionName) !== FALSE) {
       $results = array();
-      preg_match_all('`"([^"]*)"`', $line, $results);
+      // In the regular expression '?' is used for ungreedy match (in case of multiple usage of the uncryptStringFunction on the same line)
+      // see http://www.perlhowto.com/match_the_shortest_possible_string
+      preg_match_all('/'.$uncryptStringFunctionName.'\("(.*?)"\)/', $line, $results);
       foreach($results[1] as $item) {
         $chaineToDecrypt = luaStringToPhpString($item);
         $decryptedLine = udecrypt($chaineToDecrypt, $dtable);
