@@ -16,8 +16,8 @@
 
   */
 
-  /*
-  * Urwhigo.Hash() is in fact a the Robert Sedgewick's Hash Algorithm
+ /*
+  * Urwhigo.Hash() is in fact a variant of the Robert Sedgewick's Hash Algorithm
   */
   function RSHash($string) {
     $a = 63689;
@@ -26,9 +26,9 @@
 
     for ($i = 0, $x = strlen($string); $i < $x; $i++) {
       $hash = $hash * $a + (int) ord($string[$i]);
-      $hash = $hash % 65535;
+      $hash = fmod($hash, 65535);
       $a = $a * $b;
-      $a = $a % 65535;
+      $a = fmod($a, 65535);
     }
 
     return $hash;
