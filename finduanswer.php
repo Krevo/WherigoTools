@@ -21,8 +21,8 @@
   $print = true;
   $stopOnFirstFound = true;
   echo "First collision found =>\n";
-  foundHash($hashToFind, $len, $stopOnFirstFound, $print);
+  findHash($hashToFind, $len, $stopOnFirstFound, $print);
 
   $stopOnFirstFound = false;
   echo "All collisions found for length $len =>\n";
-  foundHash($hashToFind, $len, $stopOnFirstFound, $print);
+  findHash($hashToFind, $len, $stopOnFirstFound, $print);

@@ -69,7 +69,7 @@
     This function will return the first or all collisions for the desired hash
     (in addition collisions found can also be printed as soon as they are discovered)
   */
-  function foundHash($hashToFind, $len = 4, $stopOnFirstFound = true, $print = false)
+  function findHash($hashToFind, $len = 4, $stopOnFirstFound = true, $print = false)
   {
     $res = [];
     $max = pow(26, $len);
