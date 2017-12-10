@@ -74,12 +74,16 @@
 
   $hashToFind = intval($argv[1]);
   $len = max(4, intval($argv[2]));
-
-  $max = pow(26,$len);
-  echo "Collisions found =>\n";
-  for ($i=0; $i<$max; $i++) {
-    $s = str_pad(convBase($i, '0123456789', 'abcdefghijklmnopqrstuvwxyz'),$len,"a",STR_PAD_LEFT);
-    if (RSHash($s)==$hashToFind) echo $s."\n";
+  for ($j=1; $j<=$len; $j++) {
+    $max = pow(26,$j);
+    echo "Collisions found =>\n";
+    for ($i=0; $i<$max; $i++) {
+      $s = str_pad(convBase($i, '0123456789', 'abcdefghijklmnopqrstuvwxyz'),$j,"a",STR_PAD_LEFT);
+      if (RSHash($s)==$hashToFind) {
+        echo $s."\n";
+        die;
+      }
+    }
   }
 
 
