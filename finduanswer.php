@@ -79,7 +79,10 @@
   echo "Collisions found =>\n";
   for ($i=0; $i<$max; $i++) {
     $s = str_pad(convBase($i, '0123456789', 'abcdefghijklmnopqrstuvwxyz'),$len,"a",STR_PAD_LEFT);
-    if (RSHash($s)==$hashToFind) echo $s."\n";
+    if (RSHash($s)==$hashToFind) {
+      echo $s."\n";
+	die;
+    }
   }
 
 
