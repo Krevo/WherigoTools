@@ -21,7 +21,9 @@ Usage :
 php finduanswer.php hash_to_find [length_of_collision]
 ```
 (length_of_collision must be at least 4 characters length)
-    
+
+(You need at least PHP 5.5)
+
 readustring
 ---
 

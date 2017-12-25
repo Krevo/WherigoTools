@@ -66,20 +66,15 @@
   }
 
   /*
-    This function will return the first or all collisions for the desired hash
-    (in addition collisions found can also be printed as soon as they are discovered)
+    This function will yield collisions for the desired hash
   */
-  function findHash($hashToFind, $len = 4, $stopOnFirstFound = true, $print = false)
+  function findHash($hashToFind, $len = 4)
   {
-    $res = [];
     $max = pow(26, $len);
     for ($i=0; $i<$max; $i++) {
       $s = str_pad(convBase($i, '0123456789', 'abcdefghijklmnopqrstuvwxyz'),$len,"a",STR_PAD_LEFT);
       if (RSHash($s)==$hashToFind) {
-        $res[] = $s;
-        if ($print) echo $s . "\n";
-        if ($stopOnFirstFound) break;
+        yield $s;
       }
     }
-    return $res;
   }
