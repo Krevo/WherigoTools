@@ -7,7 +7,7 @@
   const OFFSET_FILE_HEADER = 9;
   const LENGTH_OBJECT_ID = 2;
   const LENGTH_OBJECT_ADR = 4;
-  
+
   const WHERIGO_SIGNATURE = "\x02\x0aCART\x00";
 
   // Call number of arguments
@@ -105,7 +105,7 @@
       return $returnCode;
     }
   }
-  
+
   function postProcessing($settings, $basename, $objectTypeExt) {
     if (isset($settings["Post processing"]["command"])) {
       echo "Post-processing command :".PHP_EOL;
@@ -126,6 +126,23 @@
       unlink($tmpfile);
       return $returnCode;
     }
+  }
+
+  function renameMediaFiles($basename)
+  {
+    $i = 0;
+    $luaSourceCodeFilename = $basename."_files/".$basename."_0.lua";
+    $dirname = $basename."_files/";
+    $content = file_get_contents($luaSourceCodeFilename);
+    preg_match_all('/Filename = "(.*?)"/', $content, $results);
+    echo "Renaming ".count($results[1])." media files ...";
+    foreach($results[1] as $item) {
+      $i++;
+      $ext = substr($item, strrpos($item, ".") + 1 );
+      //echo "Rename ${dirname}/${cartridgeName}_$i.$ext => ${dirname}/${item}".PHP_EOL;
+      rename("${dirname}/${basename}_$i.$ext", "${dirname}/${item}");
+    }
+    echo "done !".PHP_EOL;
   }
 
   // Extraction information header (Name of cartridge, ...)
@@ -243,13 +260,13 @@
   }
   $msg .= implode($msgPart, ", ");
   echo $msg.PHP_EOL;
-  
-  // Trying to decompile the lua byte-code  
+
+  // Trying to decompile the lua byte-code
   if ($hasSettings) {
     $settings = parse_ini_file($settingsFilename,true);
     $res = luaDecompile($settings, $basename, $objectTypeExt);
     if ($res == 0) {
+      renameMediaFiles($basename);
       postProcessing($settings, $basename, $objectTypeExt);
     }
   }
-
