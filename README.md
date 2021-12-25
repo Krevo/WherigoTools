@@ -14,7 +14,7 @@ php wherigoreader.php cartridgeFilename.gwc
 finduanswer
 ---
 
-This tool help you find an answer that will be accepted by a wherigo created with Urwhigo. Instead of testing your answer directly, the lua code test a hash of the answer. So, if you find another answer with the same hash, .. the answer is considered correct ! Considering that the hash is only 16 bits long, it's quick and easy to find collisions. You will find the ```hash_to_find``` in the lua source code.
+This tool help you find an answer that will be accepted by a wherigo created with Urwhigo. Instead of testing your answer directly, the lua code test a hash of the answer. So, if you find another answer with the same hash, .. the answer is considered correct ! Considering that the hash is only 16 bits long, it's quick and easy to find collisions. You will find the ```hash_to_find``` in the lua source code (look for a line like ```if _Urwigo.Hash(string.lower(input)) == hash_to_find then```).
 
 Usage :
 ```
