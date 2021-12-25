@@ -18,13 +18,21 @@
     $len = max(4, intval($argv[2]));
   }
 
-  $print = true;
-  $stopOnFirstFound = true;
-  echo "First collision found =>\n";
-  echo findHash($hashToFind, $len)->current()."\n";
+  $found = false;
+  while (!$found) {
+    echo "First collision found for length $len :\n";
+    $firstAnswer = findHash($hashToFind, $len)->current();
+	if ($firstAnswer!=NULL) {
+		echo $firstAnswer."\n";
+		$found = true;
+	} else {
+		echo "NOTHING FOUND WITH A LENGTH OF ".$len."\n";
+		$len++;
+		continue;
+	}
 
-  $stopOnFirstFound = false;
-  echo "All collisions found for length $len =>\n";
-  foreach (findHash($hashToFind, $len) as $hash) {
-    echo $hash."\n";
-  };
+    echo "All collisions found for length $len :\n";
+    foreach (findHash($hashToFind, $len) as $hash) {
+      echo $hash."\n";
+    };
+  }
