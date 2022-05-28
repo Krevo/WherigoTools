@@ -258,7 +258,7 @@
   foreach($nbPerType as $ext => $nb) {
     $msgPart[] = "$nb .$ext file".(($nb>1)?"s":"");
   }
-  $msg .= implode($msgPart, ", ");
+  $msg .= implode(", ", $msgPart);
   echo $msg.PHP_EOL;
 
   // Trying to decompile the lua byte-code
